@@ -1,0 +1,1 @@
+SELECT id, crd_no, name FROM form_adv_formadvfirm WHERE cik_no IS NULL
