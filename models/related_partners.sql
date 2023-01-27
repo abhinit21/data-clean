@@ -1,15 +1,14 @@
-SELECT first_name, last_name FROM formd_firmformdrelationship
+SELECT formd_firmformdrelationship.form_d_value_id, CONCAT(formd_firmformdrelationship.first_name, ' ', formd_firmformdrelationship.last_name) AS "related_partners", firms_regulatoryfirm.cik_no AS "cik_no_related_partners" FROM (
+    SELECT formd_firmformdrelationship.form_d_value_id, formd_firmformdrelationship.first_name, formd_firmformdrelationship.last_name, formd_firmformdvalue.regulatory_firm_id FROM formd_firmformdrelationship
+    LEFT JOIN formd_firmformdvalue
+    ON formd_firmformdrelationship.form_d_value_id = formd_firmformdvalue.id
+) formd_firmformdrelationship
 LEFT JOIN (
-    SELECT formd_firmformdvalue.*, merge_form_d.cik_no, merge_form_d.crd_no, merge_form_d.name FROM formd_firmformdvalue
-    LEFT JOIN (
-        SELECT form_d.*, firms_firm.cik_no, firms_firm.crd_no, firms_firm.name
-        FROM (
-            SELECT * FROM firms_regulatoryfirm WHERE form = 'D' OR form = 'D/A'
-        ) form_d
-        LEFT JOIN firms_firm ON form_d.firm_id = firms_firm.id
-    ) merge_form_d
-    ON merge_form_d.id = formd_firmformdvalue.regulatory_firm_id
-) merge_form_d_firm
-ON formd_firmformdrelationship.form_d_value_id = merge_form_d_firm.id
-WHERE crd_no IS NULL
-LIMIT 100
+    SELECT firms_regulatoryfirm.id, firms_firm.cik_no FROM (
+        SELECT id, firm_id FROM firms_regulatoryfirm WHERE form = 'D' OR form = 'D/A'
+    ) firms_regulatoryfirm
+    LEFT JOIN firms_firm
+    ON firms_regulatoryfirm.firm_id = firms_firm.id
+) firms_regulatoryfirm
+ON formd_firmformdrelationship.regulatory_firm_id = firms_regulatoryfirm.id
+LIMIT 6000
